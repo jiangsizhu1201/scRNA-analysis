@@ -1,0 +1,120 @@
+---
+title: "BMI 710 Week 3: Clustering and cell type annotation (Example code)"
+author: "Aparna Nathan"
+output:
+  html_document: 
+    toc: true
+    toc_depth: 3
+    toc_float: true
+  html_notebook: default
+  pdf_document: default
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T)
+```
+
+```{r}
+set.seed(710)
+library(Seurat)
+library(ggplot2)
+library(data.table)
+library(Matrix)
+```
+
+# Clustering and cell type annotation
+
+## Setup (from Weeks 1-2)
+
+Today, we will keep analyzing the 10K PBMC dataset by clustering the cells and trying to learn more about the cell types and pathways. The first few steps will be the same as last week. The steps below start with the data files from Week 2's in-class activity:
+
+```{r}
+counts = readRDS("~/Dropbox (Partners HealthCare)/BMI710/Lesson-02_Class_Activity/counts.rds")
+meta.data = readRDS("~/Dropbox (Partners HealthCare)/BMI710/Lesson-02_Class_Activity/meta.data.rds")
+
+sc_obj <- CreateSeuratObject(counts = counts)
+sc_obj = AddMetaData(sc_obj, meta.data)
+rm(counts, meta.data)
+gc()
+```
+
+QC:
+
+```{r}
+sc_obj[["percent_mito"]] <- PercentageFeatureSet(sc_obj, pattern = "^MT-")
+sc_obj <- subset(sc_obj, subset = nFeature_RNA > 500 & percent_mito < 20)
+```
+
+Processing:
+
+```{r}
+sc_obj <- NormalizeData(sc_obj, normalization.method = "LogNormalize", scale.factor = 10000)
+sc_obj <- FindVariableFeatures(sc_obj, selection.method = "vst", nfeatures = 2000)
+sc_obj <- ScaleData(sc_obj, do.scale  = TRUE, do.center = TRUE)
+```
+
+Dimensionality reduction:
+
+```{r}
+sc_obj <- RunPCA(sc_obj)
+sc_obj <- RunUMAP(sc_obj, dims = 1:20)
+ElbowPlot(sc_obj, ndims = 20, reduction = "pca")
+```
+
+Batch correction:
+
+```{r}
+library(harmony)
+sc_obj = RunHarmony(sc_obj, c("Experiment", "Method"))
+sc_obj <- RunUMAP(sc_obj, dims = 1:20, reduction = "harmony", reduction.name = "umap_harmony")
+```
+
+## Clustering and cell type annotation
+
+First, we need to build the graph that we will use for clustering. This graph will be made based on the PC dimensions we specify. Here, I've chosen to use 10 PCs.
+
+```{r}
+sc_obj <- FindNeighbors(sc_obj, dims = 1:10, reduction = "harmony")
+```
+
+Then, we can cluster on this graph, using our desired resolution (0.5) and algorithm (1 corresponds to Louvain).
+
+```{r}
+sc_obj <- FindClusters(sc_obj, resolution = 0.5, algorithm = 1)
+DimPlot(sc_obj, reduction = "umap_harmony", label = T, group.by = "RNA_snn_res.0.5")
+```
+
+If we want to find the top differentially expressed genes for every cluster, we can set the object's main "identity" to "RNA_snn_res.0.5", and then use `FindAllMarkers`.
+
+```{r}
+Idents(sc_obj) = "RNA_snn_res.0.5"
+top_markers = FindAllMarkers(sc_obj, logfc.threshold = 0.5, test.use = "wilcox")
+top_markers %>% filter(cluster == 7 & avg_log2FC > 0)
+```
+
+If we only want to find genes differentially expressed in one cluster vs. all others, we can use `FindMarkers`.
+
+```{r}
+FindMarkers(sc_obj, ident.1 = 0, logfc.threshold = .5, test.use = "wilcox", group.by = "RNA_snn_res.0.5")
+```
+
+We can make a heatmap of the top 10 genes (based on log2FC) from each cluster.
+
+```{r}
+top10 = top_markers %>% 
+  group_by(cluster) %>% 
+  filter(avg_log2FC > 1) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+DoHeatmap(sc_obj, features = top10$gene)
+```
+
+We can also use other tests to get differentially expressed genes using other methods. For example, we can use DESeq2 to do pseudobulk differential expression between clusters. (More details here: https://satijalab.org/seurat/articles/de_vignette#perform-de-analysis-after-pseudobulking)
+
+```{r}
+pb_sc_obj <- AggregateExpression(sc_obj, assays = "RNA", return.seurat = T, group.by = c("Experiment", "Method", "RNA_snn_res.0.5"))
+Idents(pb_sc_obj) <- "RNA_snn_res.0.5"
+top_deseq_markers = FindAllMarkers(pb_sc_obj, logfc.threshold = .5, test.use = "DESeq2")
+top_deseq_markers %>% head
+```
