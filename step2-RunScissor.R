@@ -14,7 +14,7 @@ sce=CreateSeuratObject(
   counts = scRNA@assays$RNA@counts,
   meta.data = scRNA@meta.data
 )
-# 下面的  Scissor::Seurat_preprocessing 函数需要的仅仅是表达量矩阵
+# Scissor::Seurat_preprocessing 
 sc_dataset <- Scissor::Seurat_preprocessing(
   scRNA@assays$RNA@counts , verbose = T)
 sc_dataset$celltype =  scRNA$celltype
@@ -23,20 +23,15 @@ DimPlot(sc_dataset, reduction = 'umap',
 DimPlot(sc_dataset, reduction = 'umap',
         group.by = 'celltype', label = T, label.size = 3)
 ggplot2::ggsave('umap_by_celltype_and_Scissor.pdf',width =8)
-# 可以看到9个肺腺癌病人的上皮细胞被harmony整合后
-# 上皮细胞可以区分出来正常上皮细胞亚群
-# 以及一些未知的恶性肿瘤细胞亚群
+
 DimPlot(scRNA, reduction = 'umap',
         group.by = 'celltype', label = T, label.size = 3)+
   DimPlot(sc_dataset, reduction = 'umap',
           group.by = 'orig.ident', label = T, label.size = 3)
-# 可以看到不同肿瘤病人上皮细胞harmony处理与否
-# 会导致病人个体差异被抹平
-# 如果不走harmony整合，我们就需要针对每个病人研究肿瘤内部异质性
-# 如果走harmony流程，就可以研究整体异质性
 
-sc_dataset
-scRNA
+
+# sc_dataset
+# scRNA
 
 load("../01-tcga_luad_from_xena/tcga-luad.for_survival.rdata")
 head(meta)
@@ -50,8 +45,6 @@ head(phenotype)
 table(phenotype$status)
 identical(colnames(bulk_dataset) ,row.names(phenotype))
 
-## 下面是主体代码，会很耗费时间和计算机资源
-# 我的电脑超过了半个小时
 if(T){
   start_time1 <- Sys.time()
  
@@ -112,7 +105,7 @@ phe_scissor = sc_dataset@meta.data
 load('scAB_results.Rdata')
 sc_dataset
 phe_scAB = sc_dataset@meta.data
-# 是可以看到，不同算法，结果很难有很好的一致性
+
 gplots::balloonplot(table(phe_scAB$scAB_select,phe_scissor$scissor))
 gplots::balloonplot(table(phe_scAB$celltype,phe_scAB$scAB_select))
 gplots::balloonplot(table(phe_scissor$celltype,phe_scissor$scissor))
