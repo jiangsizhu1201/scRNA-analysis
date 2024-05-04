@@ -1,4 +1,4 @@
-### 提供的是10X格式的标准三个文件，选择下载数据之后需要对数据进行整理，将三个文件分别整理到对应的文件夹中。
+### provided 10x files(in 3 dir)
 
 fs=list.files('./','features')
 fs
