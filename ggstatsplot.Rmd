@@ -1,11 +1,4 @@
----
-title: "ggstatsplot"
-author: "ylchen"
-date: "`r Sys.Date()`"
-output:
-  rmdformats::downcute:
-    self_contained: true
----
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,warning = F,message = F,collapse=TRUE)
 ```
