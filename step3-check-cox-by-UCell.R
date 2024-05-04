@@ -17,9 +17,7 @@ scRNA
 table(scRNA$celltype)
 p1=DimPlot(scRNA, reduction ="umap", group.by="celltype",label = T)
 p1
-# 可以看到9个肺腺癌病人的上皮细胞被harmony整合后
-# 上皮细胞可以区分出来正常上皮细胞亚群
-# 以及一些未知的恶性肿瘤细胞亚群
+
 cox_results=cox_results[rownames(cox_results)%in% rownames(scRNA),]
 cox_markers=list(
   pos = head(rownames(cox_results),100),
