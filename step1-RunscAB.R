@@ -6,8 +6,8 @@ library(preprocessCore)
 # https://api.github.com/repos/jinworks/scAB/tarball/HEAD
 # devtools::install_local('~/Downloads/jinworks-scAB-d142a20.tar.gz')
 library(scAB)
-# 这个scAB包自带了数据集 phenotype和bulk_dataset
-# 加载scAB包即可查看它，有助于我们理解其输入文件的要求
+# example data: phenotype, bulk_dataset
+
 head(phenotype)
 bulk_dataset[1:4,1:4]
 
@@ -16,9 +16,8 @@ scRNA
 table(scRNA$celltype)
 p1=DimPlot(scRNA, reduction ="umap", group.by="celltype",label = T)
 p1
-# 可以看到9个肺腺癌病人的上皮细胞被harmony整合后
-# 上皮细胞可以区分出来正常上皮细胞亚群
-# 以及一些未知的恶性肿瘤细胞亚群
+# liver cancer: post-harmony
+
 
 
 load("../01-tcga_luad_from_xena/tcga-luad.for_survival.rdata")
@@ -35,7 +34,7 @@ table(phenotype$status)
 identical(colnames(bulk_dataset) ,row.names(phenotype))
 
 
-# 单细胞降维聚类分群(默认流程，无harmony)
+# no harmony
 sc_dataset <- scAB::run_seurat(scRNA,verbose = FALSE) 
 p2=DimPlot(sc_dataset, reduction ="umap", group.by="orig.ident",label = T)
 p2
@@ -44,10 +43,6 @@ UMAP_celltype <- DimPlot(sc_dataset, reduction ="umap",
 UMAP_celltype
 p1+p2
 ggplot2::ggsave('UMAP_harmony_or_not.pdf',width = 10)
-# 可以看到不同肿瘤病人上皮细胞harmony处理与否
-# 会导致病人个体差异被抹平
-# 如果不走harmony整合，我们就需要针对每个病人研究肿瘤内部异质性
-# 如果走harmony流程，就可以研究整体异质性
 
 
 pdf('orig.ident-vs-phenotype.pdf')
@@ -56,8 +51,7 @@ gplots::balloonplot(
 )
 dev.off()
 
-## 下面是主体代码，会很耗费时间和计算机资源
-# 我自己的电脑耗时31分钟
+### cluster needed
 if(T){
   start_time1 <- Sys.time()
   scAB_data <- create_scAB(sc_dataset,bulk_dataset,phenotype)
@@ -94,7 +88,7 @@ ggplot2::ggsave('UMAP_scAB.pdf',width = 10)
 gplots::balloonplot(
   table(sc_dataset$scAB_select,sc_dataset$celltype)
 )
-# 还是可以看到cycle以及1和7这3个亚群是有特殊性
+
 
 
 
