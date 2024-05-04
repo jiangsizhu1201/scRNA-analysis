@@ -1,4 +1,4 @@
-###### step1: 获取单细胞转录组数据集 ######
+###### step1 ######
 
 suppressMessages(library(scater))
 suppressMessages(library(scRNAseq))
@@ -37,26 +37,25 @@ table(sce.all@meta.data$orig.ident)
 
 
 
-###### step2:QC质控 ######
+###### step2:QC ######
 
 dir.create("./1-QC")
 setwd("./1-QC") 
-#计算线粒体基因比例
-# 人和鼠的基因名字稍微不一样 
+
 mito_genes=rownames(sce.all)[grep("^MT-", rownames(sce.all))] 
-mito_genes #13个线粒体基因
+mito_genes 
 sce.all=PercentageFeatureSet(sce.all, "^MT-", col.name = "percent_mito")
 fivenum(sce.all@meta.data$percent_mito)
-#计算核糖体基因比例
+
 ribo_genes=rownames(sce.all)[grep("^Rp[sl]", rownames(sce.all),ignore.case = T)]
 ribo_genes
 sce.all=PercentageFeatureSet(sce.all, "^RP[SL]", col.name = "percent_ribo")
 fivenum(sce.all@meta.data$percent_ribo)
-#计算红血细胞基因比例
+# 
 rownames(sce.all)[grep("^Hb[^(p)]", rownames(sce.all),ignore.case = T)]
 sce.all=PercentageFeatureSet(sce.all, "^HB[^(P)]", col.name = "percent_hb")
 fivenum(sce.all@meta.data$percent_hb)
-#可视化细胞的上述比例情况
+#
 feats <- c("nFeature_RNA", "nCount_RNA", "percent_mito", "percent_ribo", "percent_hb")
 feats <- c("nFeature_RNA", "nCount_RNA")
 p1=VlnPlot(sce.all, group.by = "orig.ident", features = feats, pt.size = 0.01, ncol = 2) + 
@@ -73,21 +72,21 @@ ggsave(filename="Vlnplot2.png",plot=p2)
 
 p3=FeatureScatter(sce.all, "nCount_RNA", "nFeature_RNA", group.by = "orig.ident", pt.size = 0.5)
 ggsave(filename="Scatterplot.png",plot=p3)
-#根据上述指标，过滤低质量细胞/基因
-#过滤指标1:最少表达基因数的细胞&最少表达细胞数的基因
+#
+#
 selected_c <- WhichCells(sce.all, expression = nFeature_RNA > 300)
 selected_f <- rownames(sce.all)[Matrix::rowSums(sce.all@assays$RNA@counts > 0 ) > 3]
 
 sce.all.filt <- subset(sce.all, features = selected_f, cells = selected_c)
 dim(sce.all) 
 dim(sce.all.filt) 
-#  可以看到，主要是过滤了基因，其次才是细胞
+#
 
 # par(mar = c(4, 8, 2, 1))
 C=sce.all.filt@assays$RNA@counts
 dim(C)
 C=Matrix::t(Matrix::t(C)/Matrix::colSums(C)) * 100
-# 这里的C 这个矩阵，有一点大，可以考虑随抽样
+# 
 C=C[,sample(1:ncol(C),100)]
 most_expressed <- order(apply(C, 1, median), decreasing = T)[50:1]
 pdf("TOP50_most_expressed_gene.pdf",width=14)
@@ -99,7 +98,7 @@ boxplot(as.matrix(Matrix::t(C[most_expressed, ])),
 dev.off()
 rm(C)
 
-#细胞周期评分
+# cell cycle
 sce.all.filt = NormalizeData(sce.all.filt)
 s.genes=Seurat::cc.genes.updated.2019$s.genes
 g2m.genes=Seurat::cc.genes.updated.2019$g2m.genes
@@ -115,9 +114,9 @@ ggsave(filename="Vlnplot4_cycle.png",plot=p4)
 sce.all.filt@meta.data  %>% ggplot(aes(S.Score,G2M.Score))+geom_point(aes(color=Phase))+
   theme_minimal()
 ggsave(filename="cycle_details.pdf" )
-# S.Score较高的为S期，G2M.Score较高的为G2M期，都比较低的为G1期
+# high S.Score: S，high G2M.Score: G2M，both low: G1
 
-###### step3: seurat 标准流程（降维聚类分群） ######
+###### step3: seurat ######
 
 sce.all.filt = FindVariableFeatures(sce.all.filt)
 sce.all.filt = ScaleData(sce.all.filt, 
@@ -153,12 +152,12 @@ ggsave(plot=p_all_markers,
        filename="first_check_all_marker_by_seurat_cluster.pdf",width = 12)
 
 
-###### step4: 注释（手动） ######
+###### step4 ######
 
 
 sce.all=sce.all.filt
 colnames(sce.all@meta.data)
-# 需要自行看图，定细胞亚群：  
+ 
 celltype=data.frame(ClusterID=0:2,
                     celltype=0:2) 
 celltype[celltype$ClusterID %in% c(2),2]='myeloid'
@@ -200,10 +199,10 @@ ggsave('markers_umap_by_celltype.pdf',units = 'cm',
        width = 22,height = 11)
 
 
-###### step5: 注释（自动） ######
+###### step5 (auto cell annotation) ######
 
 
-###### step6: 差异基因 ######
+###### step6 ######
 
 sce=sce.all
 sce
@@ -220,7 +219,6 @@ top10 <- sce.markers %>% group_by(cluster) %>% top_n(10, avg_log2FC)
 DoHeatmap(sce,top10$gene,size=3)
 ggsave(filename=paste0(pro,'_sce.markers_heatmap.pdf'))
 
-# 数据集验证，取决于单细胞是否提供
 table(sce$celltype,sample_ann$Biological_Condition)
 
 
