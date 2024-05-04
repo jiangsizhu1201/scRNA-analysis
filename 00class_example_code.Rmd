@@ -1,15 +1,4 @@
----
-title: "BMI 710 Week 3: Clustering and cell type annotation (Example code)"
-author: "Aparna Nathan"
-output:
-  html_document: 
-    toc: true
-    toc_depth: 3
-    toc_float: true
-  html_notebook: default
-  pdf_document: default
 
----
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = T)
@@ -25,7 +14,7 @@ library(Matrix)
 
 # Clustering and cell type annotation
 
-## Setup (from Weeks 1-2)
+## Setup 
 
 Today, we will keep analyzing the 10K PBMC dataset by clustering the cells and trying to learn more about the cell types and pathways. The first few steps will be the same as last week. The steps below start with the data files from Week 2's in-class activity:
 
