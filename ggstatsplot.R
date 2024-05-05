@@ -1,33 +1,24 @@
 
-* ggstatsplot
+###### ggstatsplot ######
 
-* t-test / anova，non-parametric， corr， regression
+# t-test / anova，non-parametric， corr， regression
 
-* Central tendency measure
+# Central tendency measure
 Parametric	mean 
 Non-parametric	median 
 Robust	trimmed mean 
 Bayesian	MAP (maximum a posteriori probability) estimate 
 
-
-* https://indrajeetpatil.github.io/ggstatsplot/index.html
-
-
-#install.packages("ggstatsplot")
 library(ggstatsplot)
-
 
 # I. ggbetweenstats
 
-* disproportionate: Welch's ANOVA
-
-# for reproducibility
+# disproportionate: Welch's ANOVA
 
 set.seed(123)
 head(iris)
 
 # plot
-
 ggbetweenstats(
   data = iris,
   x = Species,
@@ -40,7 +31,6 @@ ggbetweenstats(
 
 * similar to ggbetweenstats
 * pair-wise test
-
 
 library(WRS2) # for data
 library(afex) # to run anova
@@ -60,9 +50,6 @@ ggwithinstats(
 
 
 # III. gghistostats 
-
-* test.value 
-
 
 # plot
 gghistostats(
