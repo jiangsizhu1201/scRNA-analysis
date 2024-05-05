@@ -31,13 +31,13 @@ sce.all=CreateSeuratObject(counts = ct)
 
 ###### step2:QC ######
 
-## calculate mitochondrial cells 
+## calculate mitochondrial 
 mito_genes=rownames(sce.all)[grep("^MT-", rownames(sce.all))] 
 
 sce.all=PercentageFeatureSet(sce.all, "^MT-", col.name = "percent_mito")
 fivenum(sce.all@meta.data$percent_mito)
 
-## calculate ribosome cells
+## calculate ribosome 
 ribo_genes=rownames(sce.all)[grep("^Rp[sl]", rownames(sce.all),ignore.case = T)]
 sce.all=PercentageFeatureSet(sce.all, "^RP[SL]", col.name = "percent_ribo")
 fivenum(sce.all@meta.data$percent_ribo)
