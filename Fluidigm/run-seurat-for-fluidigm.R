@@ -12,10 +12,7 @@ library("ROCR")
 ###### step1 ######
 
 fluidigm <- ReprocessedFluidigmData()
-fluidigm
-
 ct <- floor(assays(fluidigm)$rsem_counts)
-ct[1:4,1:4] 
 sample_ann <- as.data.frame(colData(fluidigm))
 DT::datatable(sample_ann)
 
@@ -42,7 +39,6 @@ fivenum(sce.all@meta.data$percent_mito)
 
 ## calculate ribosome cells
 ribo_genes=rownames(sce.all)[grep("^Rp[sl]", rownames(sce.all),ignore.case = T)]
-
 sce.all=PercentageFeatureSet(sce.all, "^RP[SL]", col.name = "percent_ribo")
 fivenum(sce.all@meta.data$percent_ribo)
 
@@ -58,6 +54,7 @@ p1=VlnPlot(sce.all, group.by = "orig.ident", features = feats, pt.size = 0.01, n
   NoLegend()
 
 feats <- c("percent_mito", "percent_ribo", "percent_hb")
+
 p2=VlnPlot(sce.all, group.by = "orig.ident", features = feats, pt.size = 0.01, ncol = 3, same.y.lims=T) + 
   scale_y_continuous(breaks=seq(0, 100, 5)) +
   NoLegend()
@@ -70,25 +67,20 @@ selected_c <- WhichCells(sce.all, expression = nFeature_RNA > 300)
 selected_f <- rownames(sce.all)[Matrix::rowSums(sce.all@assays$RNA@counts > 0 ) > 3]
 
 sce.all.filt <- subset(sce.all, features = selected_f, cells = selected_c)
-dim(sce.all) 
-dim(sce.all.filt) 
-#
 
 # par(mar = c(4, 8, 2, 1))
 C=sce.all.filt@assays$RNA@counts
 dim(C)
 C=Matrix::t(Matrix::t(C)/Matrix::colSums(C)) * 100
-# random sampling (C too large)
+#### random sampling (C too large) 
 C=C[,sample(1:ncol(C),100)]
 most_expressed <- order(apply(C, 1, median), decreasing = T)[50:1]
-pdf("TOP50_most_expressed_gene.pdf",width=14)
 boxplot(as.matrix(Matrix::t(C[most_expressed, ])),
         cex = 0.1, las = 1, 
         xlab = "% total count per cell", 
         col = (scales::hue_pal())(50)[50:1], 
         horizontal = TRUE)
-dev.off()
-rm(C)
+
 
 # scoring by cell cycle 
 sce.all.filt = NormalizeData(sce.all.filt)
@@ -138,8 +130,7 @@ p_all_markers <- DotPlot(sce.all.filt, features = genes_to_check,
 ###### step4 ######
 
 sce.all=sce.all.filt
-colnames(sce.all@meta.data)
- 
+
 celltype=data.frame(ClusterID=0:2,
                     celltype=0:2) 
 celltype[celltype$ClusterID %in% c(2),2]='myeloid'
@@ -185,11 +176,12 @@ sce.markers <- FindAllMarkers(object = sce, only.pos = TRUE, min.pct = 0.25,
 DT::datatable(sce.markers)
 pro='fluidigm'
 write.csv(sce.markers,file=paste0(pro,'_sce.markers.csv'))
+
 library(dplyr) 
 top10 <- sce.markers %>% group_by(cluster) %>% top_n(10, avg_log2FC)
 DoHeatmap(sce,top10$gene,size=3)
 
-table(sce$celltype,sample_ann$Biological_Condition)
+# table(sce$celltype,sample_ann$Biological_Condition)
 
 
 
