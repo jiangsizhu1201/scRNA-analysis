@@ -3,18 +3,18 @@ rm(list = ls())
 library(Seurat)
 library(preprocessCore)
 # devtools::install_github('sunduanchen/Scissor')
-# https://api.github.com/repos/sunduanchen/Scissor/tarball/HEAD
 # devtools::install_local('~/Downloads/sunduanchen-Scissor-311560a.tar.gz')
 library(Scissor)
 
 load('scRNA_for_scAB_Scissor.Rdata')
-scRNA
+
 table(scRNA$celltype)
 sce=CreateSeuratObject(
   counts = scRNA@assays$RNA@counts,
   meta.data = scRNA@meta.data
 )
-# Scissor::Seurat_preprocessing 
+
+# Scissor::Seurat_preprocessing (only requires expression matrix)
 sc_dataset <- Scissor::Seurat_preprocessing(
   scRNA@assays$RNA@counts , verbose = T)
 sc_dataset$celltype =  scRNA$celltype
@@ -29,9 +29,6 @@ DimPlot(scRNA, reduction = 'umap',
   DimPlot(sc_dataset, reduction = 'umap',
           group.by = 'orig.ident', label = T, label.size = 3)
 
-
-# sc_dataset
-# scRNA
 
 load("../01-tcga_luad_from_xena/tcga-luad.for_survival.rdata")
 head(meta)
@@ -105,6 +102,8 @@ phe_scissor = sc_dataset@meta.data
 load('scAB_results.Rdata')
 sc_dataset
 phe_scAB = sc_dataset@meta.data
+
+# different algorithms
 
 gplots::balloonplot(table(phe_scAB$scAB_select,phe_scissor$scissor))
 gplots::balloonplot(table(phe_scAB$celltype,phe_scAB$scAB_select))
