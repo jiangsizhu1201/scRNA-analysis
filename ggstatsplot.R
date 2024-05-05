@@ -1,8 +1,4 @@
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,warning = F,message = F,collapse=TRUE)
-```
-
 * ggstatsplot
 
 * t-test / anova，non-parametric， corr， regression
@@ -16,17 +12,15 @@ Bayesian	MAP (maximum a posteriori probability) estimate
 
 * https://indrajeetpatil.github.io/ggstatsplot/index.html
 
-```{r}
+
 #install.packages("ggstatsplot")
 library(ggstatsplot)
-```
+
 
 # I. ggbetweenstats
 
 * disproportionate: Welch's ANOVA
 
-
-```{r}
 # for reproducibility
 set.seed(123)
 head(iris)
@@ -38,14 +32,13 @@ ggbetweenstats(
   y = Sepal.Length,
   title = "Distribution of sepal length across Iris species"
 )
-```
+
 
 # II. ggwithinstats
 
 * similar to ggbetweenstats
 * pair-wise test
 
-```{r}
 # for reproducibility and data
 set.seed(123)
 library(WRS2) # for data
@@ -62,13 +55,12 @@ ggwithinstats(
   caption = "Data source: `WRS2` R package",
   ggtheme = ggthemes::theme_fivethirtyeight()
 )
-```
+
 
 # III. gghistostats 
 
 * test.value 
 
-```{r}
 # for reproducibility
 set.seed(123)
 
@@ -85,15 +77,10 @@ gghistostats(
   ggtheme = hrbrthemes::theme_ipsum_tw(),
   bf.message = FALSE ## 
 )
-```
+
 
 # IV. ggdotplotstats 
 * type = "robust" :Bootstrap-t method for one-sample test
-* https://zhuanlan.zhihu.com/p/41099219
-
-```{r}
-# for reproducibility
-set.seed(123)
 
 # plot
 ggdotplotstats(
@@ -111,8 +98,6 @@ ggdotplotstats(
     )
   )
 )
-```
-
 
 # V. ggscatterstats 
 
@@ -131,9 +116,7 @@ ggdotplotstats(
   
 3. remove bayes: bf.message = FALSE 
 
-```{r}
-# for reproducibility
-set.seed(123)
+
 data <- dplyr::filter(movies_long, genre == "Action")
 head(data)
 # plot
@@ -154,11 +137,9 @@ ggscatterstats(
   xfill = "pink", # color fill for x-axis marginal distribution
   yfill = "#009E73" # color fill for y-axis marginal distribution
 )
-```
 
 # VI. ggcorrmat 
 
-```{r}
 # for reproducibility
 set.seed(123)
 
@@ -181,11 +162,10 @@ head(
   subtitle = "sleep units: hours; weight units: kilograms",
   output = "dataframe"
 ))
-```
 
 # VII. ggpiestats 
 
-```{r}
+
 # for reproducibility
 set.seed(123)
 
@@ -200,14 +180,9 @@ ggpiestats(
   legend.title = "Transmission", # title for the legend
   caption = substitute(paste(italic("Source"), ": 1974 Motor Trend US magazine"))
 )
-```
+
 
 # VIII. ggbarstats 
-
-```{r}
-# for reproducibility
-set.seed(123)
-library(ggplot2)
 
 # plot
 ggbarstats(
@@ -220,5 +195,5 @@ ggbarstats(
   ggtheme = hrbrthemes::theme_ipsum_pub(),
   palette = "Set2"
 )
-```
+
 
