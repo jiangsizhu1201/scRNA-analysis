@@ -22,10 +22,12 @@ library(ggstatsplot)
 * disproportionate: Welch's ANOVA
 
 # for reproducibility
+
 set.seed(123)
 head(iris)
 
 # plot
+
 ggbetweenstats(
   data = iris,
   x = Species,
@@ -39,13 +41,13 @@ ggbetweenstats(
 * similar to ggbetweenstats
 * pair-wise test
 
-# for reproducibility and data
-set.seed(123)
+
 library(WRS2) # for data
 library(afex) # to run anova
 #BiocManager::install('ggthemes')
 head(WineTasting)
-table(WineTasting$Taster) #22对
+table(WineTasting$Taster) 
+
 # plot
 ggwithinstats(
   data = WineTasting,
@@ -61,8 +63,6 @@ ggwithinstats(
 
 * test.value 
 
-# for reproducibility
-set.seed(123)
 
 # plot
 gghistostats(
@@ -116,9 +116,8 @@ ggdotplotstats(
   
 3. remove bayes: bf.message = FALSE 
 
-
 data <- dplyr::filter(movies_long, genre == "Action")
-head(data)
+
 # plot
 ggscatterstats(
   data = data,
@@ -139,9 +138,6 @@ ggscatterstats(
 )
 
 # VI. ggcorrmat 
-
-# for reproducibility
-set.seed(123)
 
 # as a default this function outputs a correlation matrix plot
 ggcorrmat(
@@ -164,10 +160,6 @@ head(
 ))
 
 # VII. ggpiestats 
-
-
-# for reproducibility
-set.seed(123)
 
 # plot
 ggpiestats(
