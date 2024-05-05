@@ -2,13 +2,10 @@ rm(list = ls())
 
 library(Seurat)
 library(preprocessCore)
-# devtools::install_github('sunduanchen/Scissor')
-# devtools::install_local('~/Downloads/sunduanchen-Scissor-311560a.tar.gz')
 library(Scissor)
 
 load('scRNA_for_scAB_Scissor.Rdata')
 
-table(scRNA$celltype)
 sce=CreateSeuratObject(
   counts = scRNA@assays$RNA@counts,
   meta.data = scRNA@meta.data
@@ -30,16 +27,11 @@ DimPlot(scRNA, reduction = 'umap',
           group.by = 'orig.ident', label = T, label.size = 3)
 
 
-load("../01-tcga_luad_from_xena/tcga-luad.for_survival.rdata")
-head(meta)
-exprSet[1:4,1:4]
+load("tcga-luad.for_survival.rdata")
+
 bulk_dataset = exprSet
-head(bulk_dataset[,1:10])
-dim(bulk_dataset)
 phenotype = meta[,c(3,2)]
 colnames(phenotype)=c("time","status")
-head(phenotype)
-table(phenotype$status)
 identical(colnames(bulk_dataset) ,row.names(phenotype))
 
 if(T){
@@ -58,12 +50,6 @@ if(T){
   print(execution_time1)
 }
 
-names(infos1) 
-length(infos1$Scissor_pos) 
-infos1$Scissor_pos[1:4]
-length(infos1$Scissor_neg) 
-infos1$Scissor_neg
-
 Scissor_select <- rep("Background", ncol(sc_dataset))
 names(Scissor_select) <- colnames(sc_dataset)
 Scissor_select[infos1$Scissor_pos] <- "Scissor+"
@@ -71,20 +57,17 @@ Scissor_select[infos1$Scissor_neg] <- "Scissor-"
 sc_dataset <- AddMetaData(sc_dataset,
                           metadata = Scissor_select, 
                           col.name = "scissor")
-table(sc_dataset$scissor)
 
 p1 = DimPlot(sc_dataset, reduction = 'umap', group.by = 'scissor', 
         cols = c('grey','royalblue','indianred1'), pt.size = 1.2, order = T)
-p1
+
 p2 = DimPlot(sc_dataset, reduction = 'umap', group='celltype',
             label = T, label.size = 3)
-p2
-p1+p2
+
 
 gplots::balloonplot(
   table(sc_dataset$celltype,sc_dataset$scissor)
 )
-save(infos1,sc_dataset,file = 'output_of_Scissor.Rdata')
 
 
 if(F){
@@ -99,8 +82,6 @@ if(F){
 }
 
 phe_scissor = sc_dataset@meta.data
-load('scAB_results.Rdata')
-sc_dataset
 phe_scAB = sc_dataset@meta.data
 
 # different algorithms
