@@ -1,7 +1,3 @@
-#options("repos"="https://mirrors.ustc.edu.cn/CRAN/")
-if(!require("BiocManager")) install.packages("BiocManager",update = F,ask = F)
-#options(BioC_mirror="https://mirrors.ustc.edu.cn/bioc/")
-
 cran_packages <- c('Seurat',
                    'tidyverse'
                    ) 
