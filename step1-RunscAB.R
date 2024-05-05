@@ -3,7 +3,6 @@ rm(list = ls())
 library(Seurat)
 library(preprocessCore)
 # devtools::install_github("jinworks/scAB")
-# https://api.github.com/repos/jinworks/scAB/tarball/HEAD
 # devtools::install_local('~/Downloads/jinworks-scAB-d142a20.tar.gz')
 library(scAB)
 # example data: phenotype, bulk_dataset
@@ -12,13 +11,11 @@ head(phenotype)
 bulk_dataset[1:4,1:4]
 
 load('scRNA_for_scAB_Scissor.Rdata')
-scRNA
-table(scRNA$celltype)
+# scRNA
+# table(scRNA$celltype)
 p1=DimPlot(scRNA, reduction ="umap", group.by="celltype",label = T)
 p1
-# liver cancer: post-harmony
-
-
+# lung cancer: post-harmony
 
 load("../01-tcga_luad_from_xena/tcga-luad.for_survival.rdata")
 head(meta)
@@ -34,16 +31,16 @@ table(phenotype$status)
 identical(colnames(bulk_dataset) ,row.names(phenotype))
 
 
-# no harmony
+# dimension reduction w/o harmony
 sc_dataset <- scAB::run_seurat(scRNA,verbose = FALSE) 
 p2=DimPlot(sc_dataset, reduction ="umap", group.by="orig.ident",label = T)
-p2
 UMAP_celltype <- DimPlot(sc_dataset, reduction ="umap",
                          group.by="celltype",label = T)
-UMAP_celltype
-p1+p2
-ggplot2::ggsave('UMAP_harmony_or_not.pdf',width = 10)
+# UMAP_celltype
+# p1+p2
+# ggplot2::ggsave('UMAP_harmony_or_not.pdf',width = 10)
 
+# w/o harmony: heterogeneity across different patients
 
 pdf('orig.ident-vs-phenotype.pdf')
 gplots::balloonplot(
@@ -51,7 +48,7 @@ gplots::balloonplot(
 )
 dev.off()
 
-### cluster needed
+### cluster needed; computation-intense
 if(T){
   start_time1 <- Sys.time()
   scAB_data <- create_scAB(sc_dataset,bulk_dataset,phenotype)
@@ -82,7 +79,7 @@ UMAP_scAB <- DimPlot(sc_dataset,group.by="scAB_select",
                      cols=c("#80b1d3","red"),
                      pt.size=0.001,
                      order=c("scAB+ cells","Other cells"))
-UMAP_scAB
+# UMAP_scAB
 patchwork::wrap_plots(plots = list(UMAP_celltype,UMAP_scAB), ncol = 2)
 ggplot2::ggsave('UMAP_scAB.pdf',width = 10)
 gplots::balloonplot(
