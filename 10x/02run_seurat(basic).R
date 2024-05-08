@@ -68,7 +68,7 @@ sc_obj <- ScaleData(sc_obj,
                     do.scale  = TRUE, 
                     do.center = TRUE,
                     verbose = FALSE) 
-## dimensino reduction
+## dimension reduction
 ### PCA
 sc_obj <- RunPCA(sc_obj, verbose = FALSE) 
 ElbowPlot(sc_obj) # determine inflection point
@@ -76,14 +76,14 @@ ElbowPlot(sc_obj) # determine inflection point
 ### UMAP/TSNE
 sc_obj <- RunUMAP(sc_obj, dims = 1:20, check_duplicates = FALSE) 
 
-## perform harmony to correct batch effect
+## Perform harmony to correct batch effect
 sc_obj = RunHarmony(sc_obj, c("batch"), verbose = FALSE)
 
 sc_obj <- RunUMAP(sc_obj, 
                   dims = 1:20, 
                   reduction = "harmony", 
                   reduction.name = "umap_harmony")
-#### visulization
+#### visualization
 DimPlot(sc_obj, reduction = "umap_harmony", group.by = "batch") +
   theme_dr(xlength = 0.3,
            ylength = 0.3,
@@ -103,7 +103,7 @@ sc_obj <- FindClusters(sc_obj,
                        algorithm = 1,
                        verbose = FALSE) 
 
-### silhouett analysis
+### silhouette analysis
 
 cell_dists <- dist(sc_obj@reductions$harmony@cell.embeddings,
                    method = "euclidean")
@@ -223,7 +223,7 @@ ggplot(proportion_all, aes(x = tissue, y = proportion, fill = tissue)) +
 
 ###### step7: Differential Expression Analysis ######
 
-### pseudobulk
+### pseudo bulk
 pb_sc_obj <- AggregateExpression(sc_obj, assays = "RNA", 
                                  return.seurat = T, group.by = c("patient","cell_type", "tissue"))
 
@@ -249,7 +249,7 @@ VlnPlot(pb_sc_obj, features = genes.to.label[1:4],
         ncol = 2,
         group.by = "tissue") 
 
-### functinal enrichment analysis using fgsea
+### functional enrichment analysis using fgsea
 
 genesets <- msigdbr(species = "Homo sapiens", 
                     category = "C5", 
