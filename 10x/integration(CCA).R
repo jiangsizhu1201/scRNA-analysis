@@ -1,6 +1,4 @@
 # script to integrate scRNA-Seq datasets to correct for batch effects
-# setwd("~/Desktop/demo/single_cell_integrate")
-
 
 # load libraries
 library(Seurat)
